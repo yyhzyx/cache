@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习：大模型的上下文</title>
+<style>
+  :root { --accent: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 16px; margin-bottom: 28px; }
+  header h1 { margin: 0 0 6px; font-size: 2rem; }
+  header .tag { color: var(--muted); font-size: 0.95rem; }
+  section { background: var(--card); border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px 24px; margin-bottom: 18px; }
+  h2 { margin: 0 0 12px; font-size: 1.3rem; color: var(--accent); }
+  h3 { margin: 16px 0 6px; font-size: 1.05rem; }
+  ul, ol { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .personal { background: #eff6ff; border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 8px; font-weight: 500; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95rem; }
+  th, td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f1f5f9; }
+  .source { font-size: 0.9rem; word-break: break-all; }
+  .source li { margin: 6px 0; }
+  a { color: var(--accent); }
+  .quiz { background: #fefce8; border-left: 4px solid #eab308; padding: 14px 18px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>大模型的上下文（Context）</h1>
+    <div class="tag">概念学习资料 · 由 concept-learner 生成并人工核查</div>
+  </header>
+
+  <section>
+    <h2>一、个人解释</h2>
+    <p class="personal">上下文是模型在「这一次推理」中能看到的全部输入信息——系统提示、对话历史、工具返回的结果、检索到的文档片段等等。它决定了模型此刻「知道什么、被要求做什么」，是模型理解当前任务的全部依据。</p>
+    <p>打个比方：模型的参数像它「长期学到的知识」，而上下文像「摆在桌面上的当场材料」。桌子（上下文窗口）大小有限，材料放多了会放不下，也会更慢更贵。</p>
+  </section>
+
+  <section>
+    <h2>二、核心机制 / 组成</h2>
+    <ul>
+      <li><strong>Token 与分词器（Tokenizer）</strong>：文本先被切分成 token（词元），模型按 token 计费、计数，上下文长度也以 token 衡量。</li>
+      <li><strong>上下文窗口（Context Window）</strong>：一次能容纳的最大 token 数，超出部分会被截断或遗忘。</li>
+      <li><strong>注意力机制（Attention）</strong>：让模型在生成每个 token 时，关注上下文里最相关的部分，这是 Transformer 的核心（来源：《Attention Is All You Need》）。</li>
+      <li><strong>上下文的组成</strong>：系统提示（角色/规则）＋ 用户消息 ＋ 助手历史回复 ＋ 工具结果 ＋ 检索片段（RAG）都会被拼进上下文。</li>
+      <li><strong>检索增强生成（RAG）</strong>：当上下文窗口有限时，先检索相关文档再塞进上下文，让模型「现用现查」。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>三、一个具体应用场景</h2>
+    <p>场景：<strong>客服机器人回答关于「退货政策」的问题</strong>。</p>
+    <ol>
+      <li>用户问：「我上个月买的耳机还能退吗？」</li>
+      <li>系统把「系统提示（你是客服助手）＋ 用户问题 ＋ 检索到的退货政策文档片段」一起放进上下文。</li>
+      <li>模型基于这段上下文判断：耳机属于 30 天无理由退货范围，用户已超期，于是给出「已超期，但可申请换货」的回复。</li>
+    </ol>
+    <p>这里的关键是：模型本身不一定「背下」这家店的退货政策，是上下文里的检索片段让它此刻「知道」了规则。</p>
+  </section>
+
+  <section>
+    <h2>四、容易混淆的问题 / 使用边界</h2>
+    <table>
+      <tr><th>容易混淆</th><th>澄清</th></tr>
+      <tr><td>上下文长度 ≠ 模型「记忆力」</td><td>上下文长不代表记得好。研究发现模型对中间位置的信息容易忽略（「Lost in the Middle」现象）。</td></tr>
+      <tr><td>上下文 ≠ 模型知识</td><td>知识主要存在参数里，上下文是「当场输入」；两者会共同影响回答。</td></tr>
+      <tr><td>上下文窗口大 ≠ 一定更好</td><td>塞得越多越贵、越慢，还可能引入噪音和错误。</td></tr>
+    </table>
+    <h3>使用边界</h3>
+    <ul>
+      <li>超出窗口的信息会被截断，需要 RAG、摘要或压缩策略来兜底。</li>
+      <li>上下文可被「提示注入」污染：外部内容可能诱导模型做出越界行为，需设防。</li>
+      <li>成本与延迟随 token 数增长，长上下文并非免费的「更多记忆」。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>五、自测问题</h2>
+    <ol class="quiz">
+      <li>「上下文窗口」和「上下文」这两个词分别指什么？</li>
+      <li>为什么说上下文是模型「当场的工作材料」，而不是它的「知识」？</li>
+      <li>什么是「Lost in the Middle」现象？它对长文档问答有什么启示？</li>
+      <li>RAG 是如何帮助解决「上下文窗口有限」这个问题的？</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>六、资料来源（可核查）</h2>
+    <ul class="source">
+      <li>Attention Is All You Need（Transformer 原论文，arXiv:1706.03762）：<a href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a></li>
+      <li>Lost in the Middle: How Language Models Use Long Contexts（arXiv:2307.03172）：<a href="https://arxiv.org/abs/2307.03172">https://arxiv.org/abs/2307.03172</a></li>
+      <li>OpenAI 文档 — Context window / prompt engineering：<a href="https://platform.openai.com/docs/guides/prompt-engineering">https://platform.openai.com/docs/guides/prompt-engineering</a></li>
+      <li>Anthropic Engineering — Equipping agents for the real world with Agent Skills（含「Skills 与上下文窗口」的说明）：<a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills</a></li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>
