@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习：Agent（智能体）</title>
+<style>
+  :root { --accent: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 16px; margin-bottom: 28px; }
+  header h1 { margin: 0 0 6px; font-size: 2rem; }
+  header .tag { color: var(--muted); font-size: 0.95rem; }
+  section { background: var(--card); border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px 24px; margin-bottom: 18px; }
+  h2 { margin: 0 0 12px; font-size: 1.3rem; color: var(--accent); }
+  h3 { margin: 16px 0 6px; font-size: 1.05rem; }
+  ul, ol { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .personal { background: #eff6ff; border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 8px; font-weight: 500; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95rem; }
+  th, td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f1f5f9; }
+  .source { font-size: 0.9rem; word-break: break-all; }
+  .source li { margin: 6px 0; }
+  a { color: var(--accent); }
+  .quiz { background: #fefce8; border-left: 4px solid #eab308; padding: 14px 18px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Agent（智能体）</h1>
+    <div class="tag">概念学习资料 · 由 concept-learner 生成并人工核查</div>
+  </header>
+
+  <section>
+    <h2>一、个人解释</h2>
+    <p class="personal">Agent 是「一个会自己干活、会用工具的 LLM」。普通的 LLM 只会「一问一答」，而 Agent 会在一个大循环里：理解目标 → 规划步骤 → 调用工具 → 观察结果 → 再决定下一步，直到任务完成。它把模型的「脑子」和外部世界的「手脚」连了起来。</p>
+    <p>一个更朴素的比喻：普通聊天机器人像「只动嘴的顾问」，而 Agent 像「能自己动手完成交付的助手」——它不只告诉你该怎么做，还会真正去查资料、写代码、调用 API，把结果做出来。</p>
+  </section>
+
+  <section>
+    <h2>二、核心机制 / 组成</h2>
+    <p>一个典型 Agent 通常由以下几部分拼装而成：</p>
+    <ul>
+      <li><strong>模型（LLM）</strong>：作为「大脑」，负责理解、推理与决策。</li>
+      <li><strong>工具（Tools）</strong>：搜索、代码执行、文件读写、调用外部 API 等，是 Agent 与真实世界交互的「手脚」。</li>
+      <li><strong>记忆（Memory）</strong>：短期记忆靠「上下文」，长期记忆靠外部存储（数据库、向量库）。</li>
+      <li><strong>规划（Planning）</strong>：把大任务拆成可执行的子步骤。</li>
+      <li><strong>环境反馈循环（Loop）</strong>：观察 → 行动 → 再观察，这是 Agent 区别于单次调用的关键。</li>
+    </ul>
+    <p>一个经典的实现范式是 <strong>ReAct（Reasoning + Acting）</strong>：模型交替进行「推理（想）」和「行动（做）」，边想边做。</p>
+  </section>
+
+  <section>
+    <h2>三、一个具体应用场景</h2>
+    <p>场景：<strong>AI 编程助手（如 Claude Code、Cursor）修复一个 Bug</strong>。</p>
+    <ol>
+      <li>用户说「这个登录接口偶发 500 错误，帮我查一下」。</li>
+      <li>Agent 先理解目标，规划：先看日志 → 定位代码 → 提出修复。</li>
+      <li>它调用工具：读日志文件、搜索相关代码、查看最近的提交。</li>
+      <li>根据工具返回的结果，它判断可能是某个空指针问题，于是修改代码并运行测试。</li>
+      <li>测试通过后，它总结修改原因；若失败，则回到上一步继续排查。</li>
+    </ol>
+    <p>整个过程里，Agent 不是一次性回答，而是「边做边看结果边调整」，这就是环境反馈循环的体现。</p>
+  </section>
+
+  <section>
+    <h2>四、容易混淆的问题 / 使用边界</h2>
+    <table>
+      <tr><th>容易混淆</th><th>澄清</th></tr>
+      <tr><td>Agent ≠ 带工具的 LLM 单次调用</td><td>Agent 的关键在于「循环 + 自主决策」，不是简单地把工具结果塞回一次回答里。</td></tr>
+      <tr><td>Agent vs Workflow（工作流）</td><td>Workflow 是「预先写死路径」的编排（代码决定步骤）；Agent 是「LLM 运行时动态决定下一步」。Anthropic 建议能用简单方案就别上 Agent。</td></tr>
+      <tr><td>Agent ≠ 一定要全自动</td><td>很多好的 Agent 会在关键节点「停下来问人」，全自动只是程度问题，不是必要条件。</td></tr>
+    </table>
+    <h3>使用边界（什么时候不该用 Agent）</h3>
+    <ul>
+      <li>任务路径可预测、可写死时，用 Workflow 更可控、更便宜。</li>
+      <li>任务一次调用就能完成时，直接用 LLM 单次调用即可。</li>
+      <li>错误代价高且不可恢复时，需要加沙箱、护栏和人工检查点。</li>
+      <li>Agent 往往更慢、更贵、还可能累积错误，复杂度应是「最后手段」而非起点。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>五、自测问题</h2>
+    <ol class="quiz">
+      <li>用一句话说明 Agent 与普通「一问一答」的 LLM 最本质的区别是什么？</li>
+      <li>Agent 的「环境反馈循环」指的是什么？试举一个你见过的例子。</li>
+      <li>Workflow 和 Agent 在「控制流」上有什么不同？什么时候应该优先选 Workflow？</li>
+      <li>为什么说「不是所有任务都需要 Agent」？Agent 的成本主要体现在哪？</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>六、资料来源（可核查）</h2>
+    <ul class="source">
+      <li>Anthropic Engineering — Building Effective Agents：<a href="https://www.anthropic.com/research/building-effective-agents">https://www.anthropic.com/research/building-effective-agents</a></li>
+      <li>Anthropic Engineering — Equipping agents for the real world with Agent Skills：<a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills</a></li>
+      <li>ReAct: Synergizing Reasoning and Acting in Language Models（arXiv:2210.03629）：<a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a></li>
+      <li>LangGraph（用于构建有状态 Agent 的框架文档）：<a href="https://langchain-ai.github.io/langgraph/">https://langchain-ai.github.io/langgraph/</a></li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>
