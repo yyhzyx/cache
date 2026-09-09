@@ -1,0 +1,44 @@
+# ===== 敏感信息与凭据（严禁提交）=====
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.pem
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+credentials*.json
+secrets*.json
+*secret*
+*.token
+*.credential*
+config/local.json
+
+# ===== 系统文件 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 编辑器 / IDE =====
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# ===== 依赖与构建产物 =====
+node_modules/
+__pycache__/
+*.pyc
+dist/
+build/
+target/
+*.class
+
+# ===== 日志与临时文件 =====
+*.log
+tmp/
+temp/
