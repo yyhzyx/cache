@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习：Skill（技能）</title>
+<style>
+  :root { --accent: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 16px; margin-bottom: 28px; }
+  header h1 { margin: 0 0 6px; font-size: 2rem; }
+  header .tag { color: var(--muted); font-size: 0.95rem; }
+  section { background: var(--card); border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px 24px; margin-bottom: 18px; }
+  h2 { margin: 0 0 12px; font-size: 1.3rem; color: var(--accent); }
+  h3 { margin: 16px 0 6px; font-size: 1.05rem; }
+  ul, ol { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .personal { background: #eff6ff; border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 8px; font-weight: 500; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95rem; }
+  th, td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f1f5f9; }
+  .source { font-size: 0.9rem; word-break: break-all; }
+  .source li { margin: 6px 0; }
+  a { color: var(--accent); }
+  .quiz { background: #fefce8; border-left: 4px solid #eab308; padding: 14px 18px; border-radius: 8px; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-family: Consolas, monospace; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Skill（技能）</h1>
+    <div class="tag">概念学习资料 · 由 concept-learner 生成并人工核查</div>
+  </header>
+
+  <section>
+    <h2>一、个人解释</h2>
+    <p class="personal">Skill 是一套「可复用、可沉淀的任务知识与流程」的封装——本质是一个目录加一个 <code>SKILL.md</code> 文件。它通过「渐进式披露」按需加载到 Agent 的上下文里，让一个通用 Agent 变成某个领域的专家，而不需要每次都重新写一遍 prompt。</p>
+    <p>换个说法：Skill 就像给新员工写好的「上岗手册」，把「该做什么、按什么步骤做、注意什么」固化下来，谁接手都能照着用。</p>
+  </section>
+
+  <section>
+    <h2>二、核心机制 / 组成</h2>
+    <ul>
+      <li><strong>目录结构</strong>：<code>SKILL.md</code>（必需）+ <code>scripts/</code>（可选脚本）+ <code>references/</code>（按需加载的文档）+ <code>assets/</code>（模板资源）。</li>
+      <li><strong>YAML frontmatter</strong>：最关键是 <code>name</code> 和 <code>description</code>，Agent 启动时会把所有已安装 Skill 的名字和描述预加载进系统提示。</li>
+      <li><strong>渐进式披露（Progressive Disclosure）</strong>：三层加载——第一层元数据（常驻）→ 第二层 <code>SKILL.md</code> 正文（相关时才读）→ 第三层引用文件（需要时才读）。</li>
+      <li><strong>与上下文的关系</strong>：因为只在需要时加载，Skill 能在「不挤爆上下文」的前提下，给 Agent 提供近乎无限的领域知识。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>三、一个具体应用场景</h2>
+    <p>场景：<strong>用本仓库的 concept-learner 学习一个新概念</strong>。</p>
+    <ol>
+      <li>用户说「帮我用 concept-learner 学习『微调（Fine-tuning）』」。</li>
+      <li>Agent 从系统提示里看到 concept-learner 的名字和描述，判断它适合这个任务。</li>
+      <li>Agent 读取完整的 <code>SKILL.md</code>，按其中的「生成步骤」产出：个人解释、核心机制、应用场景、辨析、自测题、来源。</li>
+      <li>产出后按「自检要求」逐项核对，再交付给用户。</li>
+    </ol>
+    <p>同一个 Skill 可以反复用于任何概念，这就是「可复用」的价值。</p>
+  </section>
+
+  <section>
+    <h2>四、容易混淆的问题 / 使用边界</h2>
+    <table>
+      <tr><th>容易混淆</th><th>澄清</th></tr>
+      <tr><td>Skill ≠ Prompt</td><td>Prompt 是一次性的文本；Skill 是结构化、可复用、可组合、按需加载的「流程 + 知识」包。</td></tr>
+      <tr><td>Skill ≠ 工具/API</td><td>工具是「能执行的动作」；Skill 主要提供「流程知识」，虽然它也能附带脚本。</td></tr>
+      <tr><td>Skill ≠ 模型微调</td><td>Skill 不改变模型权重，只是往上下文里注入指令和知识。</td></tr>
+    </table>
+    <h3>使用边界</h3>
+    <ul>
+      <li>不适合放「一次性任务」；适合沉淀「会反复用到的流程/规范」。</li>
+      <li><code>SKILL.md</code> 建议保持精炼，过长的细节应拆到 <code>references/</code>，靠渐进式披露按需加载。</li>
+      <li>描述（description）要写清「做什么 + 何时用」，否则 Agent 无法在合适时机触发它。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>五、自测问题</h2>
+    <ol class="quiz">
+      <li>Skill 和「一段很长的 Prompt」最本质的区别是什么？</li>
+      <li>「渐进式披露」的三层分别是什么？它为什么能节省上下文？</li>
+      <li>一个 Skill 目录里，哪些是必需项、哪些是可选项？</li>
+      <li>为什么 description 字段特别重要？它写不好会导致什么问题？</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>六、资料来源（可核查）</h2>
+    <ul class="source">
+      <li>Anthropic Engineering — Equipping agents for the real world with Agent Skills：<a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills</a></li>
+      <li>Agent Skills 开放标准：<a href="https://agentskills.io/">https://agentskills.io/</a></li>
+      <li>Anthropic 官方 skills 示例仓库：<a href="https://github.com/anthropics/skills">https://github.com/anthropics/skills</a></li>
+      <li>Claude Code — Extend Claude with skills 文档：<a href="https://code.claude.com/docs/en/skills">https://code.claude.com/docs/en/skills</a></li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>
